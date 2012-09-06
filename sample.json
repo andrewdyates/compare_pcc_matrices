@@ -1,0 +1,8 @@
+{
+"split_log": "/nfs/01/osu6683/gse15745_sept2012/tissue_split_log.txt",
+"matrices": [
+  {"path": "/nfs/01/osu6683/gse15745_sept2012/gse15745_gpl6104_cerebellum_pcc.PEARSON.values.npy", "n": 146},
+  {"path": "/nfs/01/osu6683/gse15745_sept2012/gse15745_gpl6104_temporal_cortex_pcc.PEARSON.values.npy", "n": 147},
+  {"path": "/nfs/01/osu6683/gse15745_sept2012/gse15745_gpl6104_pons_pcc.PEARSON.values.npy", "n": 145},
+  {"path": "/nfs/01/osu6683/gse15745_sept2012/gse15745_gpl6104_frontal_cortex_pcc.PEARSON.values.npy", "n": 146}
+]}

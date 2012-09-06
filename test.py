@@ -18,12 +18,12 @@ class TestAll(unittest.TestCase):
       self.assertEqual(d['z'], round(artanh(d['r']),2))
     q, z_bar = z_multi_r([s['r'] for s in STUDY], [s['n'] for s in STUDY])
     print q, z_bar
-    self.assertLess(abs(q-Q), 0.2)
-    self.assertLess(abs(z_bar-Z_BAR), 0.2)
+    self.assertTrue(abs(q-Q) < 0.2)
+    self.assertTrue(abs(z_bar-Z_BAR) < 0.2)
 
   def test_pair(self):
     z = z_compare_r(R1, R2, N1, N2)
-    self.assertLess(abs(z-Z), 0.1)
+    self.assertTrue(abs(z-Z) < 0.1)
     
 
 if __name__ == "__main__":
