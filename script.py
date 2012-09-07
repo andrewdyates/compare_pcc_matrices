@@ -9,36 +9,27 @@ EXAMPLE USES:
 
 # Multiple matrices
   python $HOME/compare_pcc_matrices/script.py multi=True fname_json=$HOME/compare_pcc_matrices/sample.json outdir=$HOME
+
+# Compute p-value for multi (chi statistic)
+from scipy.stats import chi2
+pval = 1 - chi2.cdf(q_value, dof)
+
+# Compute p-value for gaussian pair of PCC values
+from scipy.special import ndtr
+pval = ndtr(z)
 """
 from __future__ import division
 import numpy as np
 import os, sys
 import json
+from __init__ import *
+
 N_REPORT=20000
 
-def artanh(r):
-  return 0.5 * np.log((1+r)/(1-r))
-
-def z_compare_r(r1, r2, n1, n2):
-  # From http://luna.cas.usf.edu/~mbrannic/files/regression/corr1.html#correlations from 2 independent samples
-  # z from normal distribution
-  n = artanh(r1) - artanh(r2)
-  d = np.sqrt(1/(n1-3) + 1/(n2-3))
-  return n/d
-
-def z_multi_r(rs, ns):
-  # From http://luna.cas.usf.edu/~mbrannic/files/regression/corr1.html
-  # q from chi-squared table
-  nns = np.array(ns)-3
-  zs = np.array(map(artanh, rs))
-  z_hat = np.dot(nns, zs) / np.sum(nns)
-  q = np.dot(nns, (zs-z_hat)**2)
-  return q, z_hat
-
-def get_outname(fname1, fname2):
+def get_outname(fname1, fname2, label):
   s = os.path.basepath(fname1).rpartition('.')[0]
   t = os.path.basepath(fname2).rpartition('.')[0]
-  return "2pcc_ztest_%s_vs_%s.pkl" % (s, t)
+  return "%s_vs_%s_%s.npy" % (s, t, label)
 
 def main(fname_npy1=None, fname_npy2=None, n1=None, n2=None, outdir=""):
   if outdir: assert os.path.exists(outdir)
@@ -46,15 +37,17 @@ def main(fname_npy1=None, fname_npy2=None, n1=None, n2=None, outdir=""):
   assert n1 > 0 and n2 > 0 and fname_npy1 is not None and fname_npy2 is not None
   M1, M2 = np.load(fname_npy1), np.load(fname_npy2)
   assert np.size(M1) == np.size(M2)
-  Z = np.zeros(np.size(M1))
+  Z, PV = np.zeros(np.size(M1)), np.zeros(np.size(M1))
   for i in xrange(np.size(M1)):
-    Z[i] = z_compare_r(r1=M1[i], n1=n1, r2=M2[i], n2=n2)
+    Z[i], PV[i] = z_compare_r(r1=M1[i], n1=n1, r2=M2[i], n2=n2)
     if i % N_REPORT == 0:
-      print "Computed comparison %d of %d. Last value: %f" % (i, np.size(M1), Z[i])
+      print "Computed comparison %d of %d. Last value: %f, pv %f" % (i, np.size(M1), Z[i], PV[i])
 
-  outpath = os.path.join(outdir, get_outname(fname_npy1, fname_npy2))
-  print "Saving results as %s." % outpath
-  Z.save(outpath)
+  outpath_z = os.path.join(outdir, get_outname(fname_npy1, fname_npy2, "z"))
+  outpath_pv = os.path.join(outdir, get_outname(fname_npy1, fname_npy2, "z_pv"))
+  print "Saving results as %s and %s." % (outpath_z, outpath_pv)
+  Z.save(outpath_z)
+  PV.save(outpath_pv)
 
 def multi(fname_json=None, outdir=""):
   """Statistical test for many matrices."""
@@ -70,17 +63,19 @@ def multi(fname_json=None, outdir=""):
     size = np.size(Ms[-1])
     print "Loaded %s" % s['path']
 
-  Q = np.zeros(size)
+  Q, PV = np.zeros(size), np.zeros(size)
   for i in xrange(size):
     v = [M[i] for M in Ms]
-    q, z_hat = z_multi_r(v, ns)
-    Q[i] = q
+    q, z_hat, pv = z_multi_r(v, ns)
+    Q[i], PV[i] = q, pv
     if i % N_REPORT == 0:
-      print "Computed comparison %d of %d. Last value: %f" % (i, np.size(Ms[0]), Q[i])
+      print "Computed comparison %d of %d. Last value: %f (pv=%f)" % (i, np.size(Ms[0]), Q[i], PV[i])
 
-  outpath = os.path.join(outdir, fname_json+".all_chitest.npy")
-  print "Saving results as %s." % outpath
+  outpath_q = os.path.join(outdir, fname_json+".all_chi.npy")
+  outpath_pv = os.path.join(outdir, fname_json+".all_chi_p.npy")
+  print "Saving results as %s and %s." % (outpath_q, outpath_pv)
   Q.save(outpath)
+  PV.save(outpath)
   
 
 if __name__ == "__main__":
