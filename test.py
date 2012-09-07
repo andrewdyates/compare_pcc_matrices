@@ -1,6 +1,17 @@
 from script import *
 import unittest
 import numpy as np
+from StringIO import StringIO
+
+JSON = """
+{
+"split_log": "test_log.txt",
+"matrices": [
+  {"path": "M.npy", "n": 146},
+  {"path": "N.npy", "n": 146},
+  {"path": "O.npy", "n": 146}
+]}
+"""
 
 # Example from
 #   http://luna.cas.usf.edu/~mbrannic/files/regression/corr1.html
@@ -41,5 +52,23 @@ class TestAll(unittest.TestCase):
     self.assertRaises(AssertionError, artanh, -1.5)
     self.assertRaises(AssertionError, artanh, 1.5)
 
+def manual_test():
+  M = np.array([0.5, 0.2, -0.1, 1, -1, 0, 9])
+  N = np.array([-0.5, 0.1, -0.7, 1, -1, 0.3, 0.9])
+  O = np.array([-0.5, 0.1, -0.7, 1, -1, 0.3, 0.9])
+  np.save("M.npy", M)
+  np.save("N.npy", N)
+  np.save("O.npy", O)
+  main(fname_npy1="M.npy", fname_npy2="N.npy", n1=100, n2=200)
+  multi(fname_json=StringIO(JSON))
+  os.remove("M.npy")
+  os.remove("N.npy")
+  os.remove("O.npy")
+  os.remove("M_vs_N_z.npy")
+  os.remove("M_vs_N_z_pv.npy")
+
+  
+
 if __name__ == "__main__":
+  manual_test()
   unittest.main()

@@ -39,7 +39,11 @@ def main(fname_npy1=None, fname_npy2=None, n1=None, n2=None, outdir=""):
   assert np.size(M1) == np.size(M2)
   Z, PV = np.zeros(np.size(M1)), np.zeros(np.size(M1))
   for i in xrange(np.size(M1)):
-    Z[i], PV[i] = z_compare_r(r1=M1[i], n1=n1, r2=M2[i], n2=n2)
+    try:
+      Z[i], PV[i] = z_compare_r(r1=M1[i], n1=n1, r2=M2[i], n2=n2)
+    except AssertionError:
+      print "ERROR: i=%d PCC Value out of artanh function domain. M1[i]=%f, M2[i]=%f" % (i, M1[i], M2[i])
+      Z[i], PV[i] = np.nan, np.nan
     if i % N_REPORT == 0:
       print "Computed comparison %d of %d. Last value: %f, pv %f" % (i, np.size(M1), Z[i], PV[i])
 
@@ -52,7 +56,12 @@ def main(fname_npy1=None, fname_npy2=None, n1=None, n2=None, outdir=""):
 def multi(fname_json=None, outdir=""):
   """Statistical test for many matrices."""
   assert fname_json is not None
-  J = json.load(open(fname_json))
+  if type(fname_json) == str:
+    J = json.load(open(fname_json))
+  else:
+    # handle filepointers
+    J = json.load(fname_json)
+    fname_json = os.path.basename(J["split_log"])
   Ms, ns = [], []
   size = None
   for s in J['matrices']:
@@ -66,7 +75,11 @@ def multi(fname_json=None, outdir=""):
   Q, PV = np.zeros(size), np.zeros(size)
   for i in xrange(size):
     v = [M[i] for M in Ms]
-    q, z_hat, pv = z_multi_r(v, ns)
+    try:
+      q, z_hat, pv = z_multi_r(v, ns)
+    except AssertionError:
+      print "ERROR: i=%d PCC Value out of artanh function domain. Ms[i] = %s" % (i, (map(str, v)))
+      q, z_hat, pv = np.nan, np.nan, np.nan
     Q[i], PV[i] = q, pv
     if i % N_REPORT == 0:
       print "Computed comparison %d of %d. Last value: %f (pv=%f)" % (i, np.size(Ms[0]), Q[i], PV[i])
@@ -74,8 +87,8 @@ def multi(fname_json=None, outdir=""):
   outpath_q = os.path.join(outdir, fname_json+".all_chi.npy")
   outpath_pv = os.path.join(outdir, fname_json+".all_chi_p.npy")
   print "Saving results as %s and %s." % (outpath_q, outpath_pv)
-  np.save(outpath, Q)
-  np.save(outpath, PV)
+  np.save(outpath_q, Q)
+  np.save(outpath_pv, PV)
   
 
 if __name__ == "__main__":
