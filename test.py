@@ -1,5 +1,6 @@
 from script import *
 import unittest
+import numpy as np
 
 # Example from
 #   http://luna.cas.usf.edu/~mbrannic/files/regression/corr1.html
@@ -33,6 +34,12 @@ class TestAll(unittest.TestCase):
     print z_to_pv(-1.96)
     self.assertTrue(abs(z_to_pv(-1.96)-0.05) < 0.01)
     self.assertTrue(abs(z_to_pv(-1.96)-z_to_pv(1.96)) < 0.001)
+  def test_artanh_zero(self):
+    self.assertFalse(np.isnan(artanh(1)))
+    self.assertFalse(np.isnan(artanh(0)))
+    self.assertFalse(np.isnan(artanh(-1)))
+    self.assertRaises(AssertionError, artanh, -1.5)
+    self.assertRaises(AssertionError, artanh, 1.5)
 
 if __name__ == "__main__":
   unittest.main()

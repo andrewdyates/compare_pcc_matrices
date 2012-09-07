@@ -6,8 +6,14 @@ import numpy as np
 
 
 def artanh(r):
+  assert -1 <= r and 1 >= r
+  # avoid division by zero
+  if r == 1:
+    r = 0.9999999
+  elif r == -1:
+    r = -0.9999999
   return 0.5 * np.log((1+r)/(1-r))
-
+  
 def z_compare_r(r1, r2, n1, n2):
   # From http://luna.cas.usf.edu/~mbrannic/files/regression/corr1.html#correlations from 2 independent samples
   # z from normal distribution

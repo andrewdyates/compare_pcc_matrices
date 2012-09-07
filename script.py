@@ -46,8 +46,8 @@ def main(fname_npy1=None, fname_npy2=None, n1=None, n2=None, outdir=""):
   outpath_z = os.path.join(outdir, get_outname(fname_npy1, fname_npy2, "z"))
   outpath_pv = os.path.join(outdir, get_outname(fname_npy1, fname_npy2, "z_pv"))
   print "Saving results as %s and %s." % (outpath_z, outpath_pv)
-  Z.save(outpath_z)
-  PV.save(outpath_pv)
+  np.save(outpath_z, Z)
+  np.save(outpath_pv, PV)
 
 def multi(fname_json=None, outdir=""):
   """Statistical test for many matrices."""
@@ -74,8 +74,8 @@ def multi(fname_json=None, outdir=""):
   outpath_q = os.path.join(outdir, fname_json+".all_chi.npy")
   outpath_pv = os.path.join(outdir, fname_json+".all_chi_p.npy")
   print "Saving results as %s and %s." % (outpath_q, outpath_pv)
-  Q.save(outpath)
-  PV.save(outpath)
+  np.save(outpath, Q)
+  np.save(outpath, PV)
   
 
 if __name__ == "__main__":
