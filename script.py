@@ -27,8 +27,8 @@ from __init__ import *
 N_REPORT=20000
 
 def get_outname(fname1, fname2, label):
-  s = os.path.basepath(fname1).rpartition('.')[0]
-  t = os.path.basepath(fname2).rpartition('.')[0]
+  s = os.path.basename(fname1).rpartition('.')[0]
+  t = os.path.basename(fname2).rpartition('.')[0]
   return "%s_vs_%s_%s.npy" % (s, t, label)
 
 def main(fname_npy1=None, fname_npy2=None, n1=None, n2=None, outdir=""):
